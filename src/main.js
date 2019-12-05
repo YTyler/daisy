@@ -69,6 +69,7 @@ $(document).ready(function(){
         break;
       }
     }
+    return damage
   }
 
   let enemyArray;
@@ -82,15 +83,15 @@ $(document).ready(function(){
     for (let i = 0; i < enemyArray.length; i++) { //populates enemies
       $('.enemySide').append(`
         <div class="enemy${i+1}">
-        <div id="health0">
+        <div id="health${i+1}">
+        <p><br></p>
         </div>
         <div class="healthBackground">
         <div id="en${i+1}Health" class='healthProgress'>
         <p class="barTitle">Health</p>
         </div>
         </div>
-        <input type="radio" class="target" name="target" value="${i}">en1<br>
-        1
+        <input type="radio" class="target" name="target" value="${i}"> enemy ${i+1}<br>
         </div>
         `)
         $(`#en${i+1}Health`).animate({ width: (enemyArray[i].health.value/enemyArray[i].health.max)*100 + "%"});
@@ -104,16 +105,24 @@ $(document).ready(function(){
     $("#combatIntake").on('click', '.combatButton', function(event){
       event.preventDefault();
       let action = this['id'];
-      let target = enemyArray[parseInt($("input[name=target]:checked").val())]
-
+      let targetindex = parseInt($("input[name=target]:checked").val());
+      let target = enemyArray[targetindex];
 
       //PLAYER ACTION
       if (action === "attackSubmit") {
-        player.attack(target);
-        console.log(target);
+        let damage = player.attack(target);
+
+        setTimeout(function(){
+          setTimeout(() => {
+          $(`#health${targetindex + 1}`).html('<p><br></p>');
+        },300);
+        $(`#health${targetindex + 1}`).html(`<p id="damageOutput">${damage}</p>`);
+
+        }, 600);
+
       } else if (action === "castSubmit"){
         player.cast(player.spells[0], target);
-        console.log(target);
+
       } else if (action === "useSubmit"){
         console.log('item');
       } else {
@@ -121,12 +130,22 @@ $(document).ready(function(){
       }
 
       //LOOP ENEMY ACTIONS
+      let enemyDamage
       for (let i=0; i<enemyArray.length; i++) {
-        setTimeout(() => {doAction(enemyArray[i], player)},3000);
+        setTimeout(() => {enemyDamage = doAction(enemyArray[i], player)
         $(`#en${i+1}Health`).animate({ width: (enemyArray[i].health.value/enemyArray[i].health.max)*100 + "%"});
-        console.log(player);
-      }
+        $('.playerProgress').animate({ width: (player.health.value/player.health.max)*100 + "%"});
+        setTimeout(() => {
+        $(`#playerDamage`).html('<p><br></p>');
+      },300);
+        console.log(player.health.value);
+        $(`#playerDamage`).html(`<p id="damageOutput">${enemyDamage}</p>`);
+      },600 *(i+1));
+      $(`#playerDamage`).html('<p><br></p>')
 
+      console.log('outside for');
+
+      }
 
     })
   });
