@@ -9,6 +9,7 @@ import * as deck from './deck.js';
 import {combatStart} from './combat.js';
 
 const player = deck.thief;
+$('.playerProgress').animate({ width: player.health.value + "%"});
 
 $(document).ready(function(){
   //Navigation
@@ -70,17 +71,21 @@ $(document).ready(function(){
     }
   }
 
+  let enemyArray;
+
   function fillEnemies(enemies) {
+
+    enemyArray = enemies;
 
     $('.enemySide').html(''); //clears enemy slots
 
-    for (let i = 0; i < enemies.length; i++) { //populates enemies
+    for (let i = 0; i < enemyArray.length; i++) { //populates enemies
       $('.enemySide').append(`
         <div class="enemy${i+1}">
         <div id="health0">
         </div>
         <div class="healthBackground">
-        <div id="en1Health"class='healthProgress'>
+        <div id="en${i+1}Health" class='healthProgress'>
         <p class="barTitle">Health</p>
         </div>
         </div>
@@ -88,13 +93,17 @@ $(document).ready(function(){
         1
         </div>
         `)
+        $(`#en${i+1}Health`).animate({ width: (enemyArray[i].health.value/enemyArray[i].health.max)*100 + "%"});
       }
+
+
     }
+
+    $('.playerProgress').animate({ width: (player.health.value/player.health.max)*100 + "%"});
 
     $("#combatIntake").on('click', '.combatButton', function(event){
       event.preventDefault();
       let action = this['id'];
-      let enemyArray = deck.giantRat;
       let target = enemyArray[parseInt($("input[name=target]:checked").val())]
 
 
@@ -114,6 +123,7 @@ $(document).ready(function(){
       //LOOP ENEMY ACTIONS
       for (let i=0; i<enemyArray.length; i++) {
         setTimeout(() => {doAction(enemyArray[i], player)},3000);
+        $(`#en${i+1}Health`).animate({ width: (enemyArray[i].health.value/enemyArray[i].health.max)*100 + "%"});
         console.log(player);
       }
 
